@@ -60,6 +60,11 @@ private:
 				"</head>" 
 				"<body>" 
 					"<h1>" + msg + "</h1>" 
+					"<form>"
+						"<input type='text' name='inputField'> <br>"
+						"<input type='text' name='inputField2'> <br>"
+						"<input type='submit'>"
+					"</form>"
 				"</body>" 
 			"</html>";
 	}
@@ -70,6 +75,7 @@ class RequestParser
 	char mRequest[1000];
 	char mMethod[10];
 	char mUrl[100];
+	map<string, string> mParams;
 	
 	void findMethod()
 	{		
@@ -93,6 +99,15 @@ class RequestParser
 	{
 		findMethod();
 		findUrl();
+
+		//  /?inputField=...&inputField2=...		=>
+		//  /:val1/:val2
+
+		string cUrl = string(mUrl);
+		// while (true)
+		// {
+		// 	cUrl
+		// }
 	}
 	void setZero()
 	{
@@ -155,7 +170,7 @@ public:
 
 		get("/mySecretRequest", [](Request req, Response res)
 		{
-			res.send("can'\t get " + req.url());
+			res.send("can\'t get " + req.url());
 		});
 
 		if (f)
@@ -186,6 +201,9 @@ private:
 			parser.setRequest(buf);
 			Request req = parser.request();
 			
+			// cout << buf << endl;
+			cout << req.url() << endl;
+			
 			if (mRequestsMap.count(req.url()))
 			{
 				(mRequestsMap[req.url()])(req, Response(temp));
@@ -207,9 +225,18 @@ int main()
 {	
 	Server server;
 
-	server.get("/rock", [](Request req, Response res)
+	server.get("/", [](Request req, Response res)
 	{
-		res.send("roll");
+		res.send("Main page");
+	});
+	server.get("/test", [](Request req, Response res)
+	{
+		res.send("Just test shit");
+	});
+	
+	server.get("/:val1/:val2", [](Request req, Response res)
+	{
+		res.send("|_|");
 	});
 
 	server.listen(12345, []()
