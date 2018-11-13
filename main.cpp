@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include <string>
 #include <map>
@@ -17,8 +18,10 @@ class Request
 {
 	string mMethod;
 	string mUrl;
+	map<string, string> mParams;
+	
 public:
-	Request(string method, string url) : mMethod(method), mUrl(url)
+	Request(string method, string url, map<string, string> params) : mMethod(method), mUrl(url), mParams(params)
 	{		
 	}
 
@@ -30,21 +33,33 @@ public:
 	{
 		return mUrl;
 	}
+	map<string, string> params() const
+	{
+		return mParams;
+	}
 };
 class Response
 {
 	SOCKET mSock;
 	string mPage;
 	string mText;
+	string mHead;
 public:
 	Response(SOCKET sock) : mSock(sock)
 	{		
+		mHead = "HTTP/1.1 200 Ok\nContent-Type: text/html; charset=UTF-8\n\n";
 	}
 
 	void send(string msg)
 	{
 		resetPage(msg);
 		::send(mSock, mPage.c_str(), mPage.size(), 0);
+	}
+	void end(string msg)
+	{
+		msg = mHead  + msg;
+
+		::send(mSock, msg.c_str(), msg.size(), 0);
 	}
 private:
 	void resetPage(string msg)
@@ -60,11 +75,15 @@ private:
 				"</head>" 
 				"<body>" 
 					"<h1>" + msg + "</h1>" 
-					"<form>"
+					"<form id='form' action='http://localhost:12345'>"
 						"<input type='text' name='inputField'> <br>"
 						"<input type='text' name='inputField2'> <br>"
-						"<input type='submit'>"
+						"<input type='submit' value='send data'>"
 					"</form>"
+					
+					"<input id='button' type='button' value='Press me!'>"
+					
+					"<script type='text/javascript' src='script.js'></script>"
 				"</body>" 
 			"</html>";
 	}
@@ -102,12 +121,58 @@ class RequestParser
 
 		//  /?inputField=...&inputField2=...		=>
 		//  /:val1/:val2
-
+		
+		
 		string cUrl = string(mUrl);
-		// while (true)
-		// {
-		// 	cUrl
-		// }
+		string newUrl = "";
+		int markIndex = cUrl.find("?");
+		if (markIndex != string::npos)
+		{
+			int lastVariable = 0;//parse last variable, later will equal 1
+			newUrl = cUrl.substr(0, markIndex);
+			cUrl = cUrl.substr(markIndex + 1, cUrl.size() - markIndex + 1);
+			
+			while (true)
+			{							
+				int markEqual = cUrl.find("=");
+				if (markEqual == string::npos)
+				{
+					break;
+				}
+				
+				string variableName = cUrl.substr(0, markEqual);
+				
+				int markAmp = cUrl.find("&");
+				if (markAmp == string::npos)
+				{
+					markAmp = cUrl.size() - 1;
+					lastVariable = 1;
+				}
+					
+				string variableValue = cUrl.substr(markEqual + 1, markAmp - markEqual - 1 + lastVariable);
+				
+				//change url!
+				cUrl = cUrl.substr(markAmp + 1, cUrl.size() - markAmp);
+				
+				mParams.insert(pair<string, string>(variableName, variableValue));
+			}
+			if (newUrl.at(newUrl.size() - 1) == '/')
+			{
+				newUrl = newUrl.substr(0, newUrl.size() - 1);
+			}
+			for (map<string, string>::iterator it = mParams.begin(); it != mParams.end(); ++it)
+			{
+				newUrl += "/:" + it->first;
+			}			
+			
+			//new url with ,,:,,
+			memset(mUrl, 0, 100);
+			memcpy(mUrl, newUrl.c_str(), newUrl.size());
+		}	
+		if (strlen(mUrl) != 1 && mUrl[strlen(mUrl) - 1] == '/')
+		{
+			mUrl[strlen(mUrl) - 1] = 0;
+		}
 	}
 	void setZero()
 	{
@@ -126,7 +191,7 @@ public:
 	
 	Request request() const
 	{
-		return Request(string(mMethod), string(mUrl));
+		return Request(string(mMethod), string(mUrl), mParams);
 	}	
 };
 
@@ -138,8 +203,6 @@ class Server
 	const int bufSize = 1000;
 	char buf[1000];
 	map<string, RequestCallback> mRequestsMap;
-
-	RequestParser parser;
 
 public:
 	Server()
@@ -198,10 +261,11 @@ private:
 		
 			recv(temp, buf, bufSize, 0);		
 			
+			RequestParser parser;
 			parser.setRequest(buf);
 			Request req = parser.request();
 			
-			// cout << buf << endl;
+			cout << buf << endl;
 			cout << req.url() << endl;
 			
 			if (mRequestsMap.count(req.url()))
@@ -211,10 +275,8 @@ private:
 			else
 			{
 				(mRequestsMap["/mySecretRequest"])(req, Response(temp));
-			}		
+			}					
 			
-			
-			// send(temp, page.c_str(), page.size(), 0);
 			closesocket(temp);
 			setZero();		
 		}	
@@ -231,13 +293,21 @@ int main()
 	});
 	server.get("/test", [](Request req, Response res)
 	{
-		res.send("Just test shit");
+		res.end("Just test shit");
+	});
+	server.get("/script.js", [](Request req, Response res)
+	{
+		ifstream jsFile("script.js");
+		string jsData((std::istreambuf_iterator<char>(jsFile)), (std::istreambuf_iterator<char>()));
+		
+		res.end(jsData);
+		jsFile.close();
+	});	
+	server.get("/:inputField/:inputField2", [](Request req, Response res)
+	{
+		res.send(req.params()["inputField"] + " and " + req.params()["inputField2"]);
 	});
 	
-	server.get("/:val1/:val2", [](Request req, Response res)
-	{
-		res.send("|_|");
-	});
 
 	server.listen(12345, []()
 	{
