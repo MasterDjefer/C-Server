@@ -26,7 +26,7 @@ void Server::listen(int port, Func f = NULL)
 	if (res < 0)
 		throw "listen error";  
 
-	get("/mySecretRequest", [](Request req, Response res)
+	get("/defunctRequest", [](Request req, Response res)
 	{
 		res.send("can\'t get " + req.url());
 	});
@@ -37,15 +37,22 @@ void Server::listen(int port, Func f = NULL)
 	}
 	acceptConnection();
 }
+void Server::defunctRequest(Request req, Response res)
+{
+	res.send("can\'t " + req.method() + " " + req.url());
+}
 void Server::get(std::string url, RequestCallback callback)
 {
-	mRequestsMap.insert(std::pair<std::string, RequestCallback>(url, callback));
+	mGetRequestsMap.insert(std::pair<std::string, RequestCallback>(url, callback));
+}
+void Server::post(std::string url, RequestCallback callback)
+{
+	mPostRequestsMap.insert(std::pair<std::string, RequestCallback>(url, callback));
 }
 void Server::setZero()
 {
 	memset(buf, 0, bufSize);
 }
-
 void Server::acceptConnection()
 {
 	SOCKET temp;
@@ -59,17 +66,32 @@ void Server::acceptConnection()
 		parser.setRequest(buf);
 		Request req = parser.request();
 		
-		//cout << buf << endl;
-		std::cout << req.url() << std::endl;
+		// std::cout << buf << std::endl;
+		std::cout << req.method() << " " << req.url() << std::endl;
 		
-		if (mRequestsMap.count(req.url()))
+		if (req.method() == "GET")
 		{
-			(mRequestsMap[req.url()])(req, Response(temp));
+			if (mGetRequestsMap.count(req.url()))
+			{
+				(mGetRequestsMap[req.url()])(req, Response(temp));
+			}
+			else
+			{
+				defunctRequest(req, Response(temp));
+			}	
 		}
 		else
+		if (req.method() == "POST")			
 		{
-			(mRequestsMap["/mySecretRequest"])(req, Response(temp));
-		}					
+			if (mPostRequestsMap.count(req.url()))
+			{
+				(mPostRequestsMap[req.url()])(req, Response(temp));
+			}
+			else
+			{
+				defunctRequest(req, Response(temp));
+			}
+		}	
 		
 		closesocket(temp);
 		setZero();		

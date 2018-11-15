@@ -1,5 +1,4 @@
 var request = new XMLHttpRequest();
-
 request.onreadystatechange = function()
 {
     if (request.readyState == XMLHttpRequest.DONE)
@@ -7,11 +6,26 @@ request.onreadystatechange = function()
         document.getElementById("msg").innerHTML = request.responseText;
     }
 }
-document.getElementById("form").submit = function()
+document.getElementById("submitButton").onclick = function()
 {
-    console.log("sdf");
-    request.open("GET", "/?inputField=" + document.getElementById("form")[0].value + "&inputField2=" + document.getElementById("form")[1].value, true);
+    request.open("GET", "/?name=" + document.getElementById("form")[0].value + "&age=" + document.getElementById("form")[1].value, true);   
     request.send();
+};
+
+var postRequest = new XMLHttpRequest();
+postRequest.onreadystatechange = function()
+{
+    if (postRequest.readyState == XMLHttpRequest.DONE)
+    {
+        // document.getElementById("msg").innerHTML = postRequest.responseText;
+        console.log(postRequest.responseText);
+    }
+}
+document.getElementById("postButton").onclick = function()
+{
+    postRequest.open("POST", "/me", true);
+    var obj = "name=pasha&age=16";
+    postRequest.send(obj);
 };
 
 

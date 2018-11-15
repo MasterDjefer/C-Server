@@ -1,6 +1,7 @@
 #include "Request.hpp"
 
-Request::Request(std::string method, std::string url, std::map<std::string, std::string> params) : mMethod(method), mUrl(url), mParams(params)
+Request::Request(std::string method, std::string url, std::unordered_map<std::string, std::string> params, std::unordered_map<std::string, std::string> body) : 
+	mMethod(method), mUrl(url), mParams(params), mBody(body)
 {		
 }
 
@@ -17,4 +18,10 @@ std::string Request::params(std::string key)
 	if (mParams.find(key) == mParams.end())
 		throw "invalid params";
 	return mParams[key];
+}
+std::string Request::body(std::string key)
+{
+	if (mBody.find(key) == mBody.end())
+		throw "invalid key in body";
+	return mBody[key];
 }

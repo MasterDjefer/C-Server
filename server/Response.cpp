@@ -14,3 +14,4 @@ void Response::end(std::string msg)
 {
 	::send(mSock, msg.c_str(), msg.size(), 0);
 }
+

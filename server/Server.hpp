@@ -2,7 +2,7 @@
 #define SERVER_H
 #include <iostream>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <functional>
 #include <winsock2.h>
 #include "Request.hpp"
@@ -22,15 +22,17 @@ class Server
 	sockaddr_in sockAddr;
 	const int bufSize = 1000;
 	char buf[1000];
-	std::map<std::string, RequestCallback> mRequestsMap;
+	std::unordered_map<std::string, RequestCallback> mGetRequestsMap;
+	std::unordered_map<std::string, RequestCallback> mPostRequestsMap;
 
 public:
 	Server();
 	void listen(int port, Func f);
 	void get(std::string url, RequestCallback callback);
+	void post(std::string url, RequestCallback callback);
 private:
-	void setZero();
-	
+	void setZero();	
 	void acceptConnection();
+	void defunctRequest(Request req, Response res);
 };
 #endif

@@ -18,11 +18,13 @@ void RequestParser::findUrl()
 		mUrl[j++] = mRequest[i++];
 	}
 }	
-void RequestParser::parse()
+void RequestParser::parseHead()
 {
 	findMethod();
 	findUrl();
-
+}
+void RequestParser::parseGet()
+{
 	//  /?inputField=...&inputField2=...		=>
 	//  /:val1/:val2	
 	
@@ -63,10 +65,12 @@ void RequestParser::parse()
 		{
 			newUrl = newUrl.substr(0, newUrl.size() - 1);
 		}
-		for (std::map<std::string, std::string>::iterator it = mParams.begin(); it != mParams.end(); ++it)
+		std::string tempUrl = "";
+		for (std::unordered_map<std::string, std::string>::iterator it = mParams.begin(); it != mParams.end(); ++it)
 		{
-			newUrl += "/:" + it->first;
-		}			
+			tempUrl = "/:" + it->first + tempUrl;
+		}	
+		newUrl += tempUrl;		
 		
 		//new url with ,,:,,
 		memset(mUrl, 0, 100);
@@ -75,6 +79,43 @@ void RequestParser::parse()
 	if (strlen(mUrl) != 1 && mUrl[strlen(mUrl) - 1] == '/')
 	{
 		mUrl[strlen(mUrl) - 1] = 0;
+	}
+}
+void RequestParser::parsePost()
+{
+	//  name=pasha&age=16		=>
+	//  map.push("name", "pasha"), map.push("age", "16") 	
+
+	int i = strlen(mRequest);
+	while (mRequest[--i] != '\n');
+	char *temp = mRequest;
+	temp += i + 1;
+
+	std::string body(temp);
+	int lastVariable = 0;//parse last variable, later will be equal 1
+	while (true)
+	{							
+		int markEqual = body.find("=");
+		if (markEqual == std::string::npos)
+		{
+			break;
+		}
+		
+		std::string variableName = body.substr(0, markEqual);
+		
+		int markAmp = body.find("&");
+		if (markAmp == std::string::npos)
+		{
+			markAmp = body.size() - 1;
+			lastVariable = 1;
+		}
+			
+		std::string variableValue = body.substr(markEqual + 1, markAmp - markEqual - 1 + lastVariable);
+		
+		//change url!
+		body = body.substr(markAmp + 1, body.size() - markAmp);
+		
+		mBody.insert(std::pair<std::string, std::string>(variableName, variableValue));
 	}
 }
 void RequestParser::setZero()
@@ -87,10 +128,20 @@ void RequestParser::setRequest(char *request)
 {
 	setZero();
 	memcpy(mRequest, request, strlen(request));
-	parse();		
+	parseHead();	
+
+	if (!strcmp(mMethod, "GET"))
+	{
+		parseGet();
+	}
+	else
+	if (!strcmp(mMethod, "POST"))
+	{
+		parsePost();
+	}
 }	
 Request RequestParser::request() const
 {
-	return Request(std::string(mMethod), std::string(mUrl), mParams);
+	return Request(std::string(mMethod), std::string(mUrl), mParams, mBody);
 }	
 
