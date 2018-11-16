@@ -26,11 +26,6 @@ void Server::listen(int port, Func f = NULL)
 	if (res < 0)
 		throw "listen error";  
 
-	get("/defunctRequest", [](Request req, Response res)
-	{
-		res.send("can\'t get " + req.url());
-	});
-
 	if (f)
 	{
 		f();
@@ -60,14 +55,18 @@ void Server::acceptConnection()
 	{
 		temp = accept(sock, NULL, NULL);		
 	
-		recv(temp, buf, bufSize, 0);		
+		recv(temp, buf, bufSize, 0);
+		if (std::string(buf) == "EXIT")
+		{
+			exit(1);
+		}		
 		
 		RequestParser parser;
 		parser.setRequest(buf);
 		Request req = parser.request();
 		
-		// std::cout << buf << std::endl;
 		std::cout << req.method() << " " << req.url() << std::endl;
+		// std::cout << buf << std::endl;
 		
 		if (req.method() == "GET")
 		{
