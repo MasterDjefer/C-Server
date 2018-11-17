@@ -120,9 +120,9 @@ void RequestParser::parsePost()
 }
 void RequestParser::setZero()
 {
-	memset(mRequest, 0, 1000);
+	memset(mRequest, 0, 10000);
 	memset(mMethod, 0, 10);
-	memset(mUrl, 0, 100);
+	memset(mUrl, 0, 1000);
 }
 void RequestParser::setRequest(char *request)
 {

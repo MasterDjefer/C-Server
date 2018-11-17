@@ -8,9 +8,9 @@
  
 class RequestParser
 {
-	char mRequest[1000];
+	char mRequest[10000];
 	char mMethod[10];
-	char mUrl[100];
+	char mUrl[1000];
 	std::unordered_map<std::string, std::string> mParams;
 	std::unordered_map<std::string, std::string> mBody;
 	

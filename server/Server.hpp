@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include <functional>
+#include <functional> 
 #include <winsock2.h>
 #include "Request.hpp"
 #include "Response.hpp"
@@ -20,8 +20,8 @@ class Server
 {
 	SOCKET sock;
 	sockaddr_in sockAddr;
-	const int bufSize = 1000;
-	char buf[1000];
+	const int bufSize = 100000;
+	char buf[100000];
 	std::unordered_map<std::string, RequestCallback> mGetRequestsMap;
 	std::unordered_map<std::string, RequestCallback> mPostRequestsMap;
 

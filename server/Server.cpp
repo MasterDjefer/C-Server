@@ -34,7 +34,8 @@ void Server::listen(int port, Func f = NULL)
 }
 void Server::defunctRequest(Request req, Response res)
 {
-	res.send("can\'t " + req.method() + " " + req.url());
+	res.setStatus("404");
+	res.send("can\'t " + req.method() + " " + req.url(), Response::TextType::html);
 }
 void Server::get(std::string url, RequestCallback callback)
 {
@@ -50,12 +51,24 @@ void Server::setZero()
 }
 void Server::acceptConnection()
 {
-	SOCKET temp;
+	// SOCKET temp;
 	while (true)
 	{
-		temp = accept(sock, NULL, NULL);		
+		SOCKET temp = accept(sock, NULL, NULL);
 	
-		recv(temp, buf, bufSize, 0);
+		int res = recv(temp, buf, bufSize, 0);//sometimes can read 0 bytes, so it needs to get next iteration(continue)(fixed)
+		if (res == SOCKET_ERROR)
+		{
+			std::cout << "error" << std::endl;
+			continue;
+		} 
+		else if (res == 0)//fix bag with timeout(i need bliakhovskyi's help(just ask))   //SERVER terminated connection
+		{
+			std::cout << "disconnect(timeout recv)" << std::endl;
+			continue;
+		}
+
+
 		if (std::string(buf) == "EXIT")
 		{
 			exit(1);
@@ -64,9 +77,9 @@ void Server::acceptConnection()
 		RequestParser parser;
 		parser.setRequest(buf);
 		Request req = parser.request();
+		// std::cout << buf << std::endl;
 		
 		std::cout << req.method() << " " << req.url() << std::endl;
-		// std::cout << buf << std::endl;
 		
 		if (req.method() == "GET")
 		{
