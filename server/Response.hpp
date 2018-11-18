@@ -17,7 +17,7 @@ public:
 	};
 
 	Response(SOCKET sock);
-	void setStatus(const std::string &status);
+	void setStatus(int status);
 	void send(std::string msg, TextType type);
 	void end(std::string msg);
 private:

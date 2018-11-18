@@ -34,7 +34,7 @@ void Server::listen(int port, Func f = NULL)
 }
 void Server::defunctRequest(Request req, Response res)
 {
-	res.setStatus("404");
+	res.setStatus(404);
 	res.send("can\'t " + req.method() + " " + req.url(), Response::TextType::html);
 }
 void Server::get(std::string url, RequestCallback callback)
@@ -51,7 +51,6 @@ void Server::setZero()
 }
 void Server::acceptConnection()
 {
-	// SOCKET temp;
 	while (true)
 	{
 		SOCKET temp = accept(sock, NULL, NULL);

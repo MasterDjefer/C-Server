@@ -3,6 +3,19 @@
 #include "Server.hpp"
 #include "VEngine.hpp"
 
+
+struct color {
+	unsigned char blue;
+	unsigned char green;
+	unsigned char red;
+};
+struct image {
+	char header[54];
+	color data[480][640];
+};
+
+
+
 int main() 
 {	
 	Server server;
@@ -26,12 +39,11 @@ int main()
 	});	
 
 
-	// server.get("/favicon.ico", [](Request req, Response res)
-	// {
-	// 	int img = open("..\\client\\images\\favicon.ico");
-
-	// 	res.end(req.params("variable") + " is shit", Response::TextType::html);
-	// });	
+	server.get("/deadpool.jpg", [](Request req, Response res)
+	{
+		// std::ifstream input_image ("..\\client\\images\\deadpool.jpg");
+		// res.end("..\\client\\images\\deadpool.jpg");
+	});	
 
 
 	server.get("/test/:variable", [](Request req, Response res)
