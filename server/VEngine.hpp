@@ -1,8 +1,10 @@
 #ifndef VENGINE_H
 #define VENGINE_H
+#include <cstdio>
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cstring>
 #include <algorithm>
 #include <dirent.h>
 
@@ -13,7 +15,10 @@ public:
 	{
 		html,
 		js,
-		css
+		css,
+		jpg,
+		ico,
+		png
 	};
 
 private:
@@ -28,5 +33,7 @@ public:
 
 private:
 	bool isFile(const char*file);
+	std::string getImage(std::string fileName);
+	std::string getText(std::string fileName);
 };
 #endif

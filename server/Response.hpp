@@ -5,22 +5,25 @@
  
 class Response
 {	
-	std::string mHeaders[3];
+	static const std::string mHeaders[];
 	SOCKET mSock;
 	std::string mStatus;
 public:
-	enum TextType
+	enum ResponseType
 	{
 		html,
 		js, 
-		css
+		css,
+		jpg,
+		ico, 
+		png
 	};
 
 	Response(SOCKET sock);
 	void setStatus(int status);
-	void send(std::string msg, TextType type);
+	void send(std::string msg, ResponseType type);
 	void end(std::string msg);
 private:
-	std::string header(TextType type);
+	std::string header(ResponseType type);
 };
 #endif

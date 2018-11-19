@@ -35,7 +35,7 @@ void Server::listen(int port, Func f = NULL)
 void Server::defunctRequest(Request req, Response res)
 {
 	res.setStatus(404);
-	res.send("can\'t " + req.method() + " " + req.url(), Response::TextType::html);
+	res.send("can\'t " + req.method() + " " + req.url(), Response::ResponseType::html);
 }
 void Server::get(std::string url, RequestCallback callback)
 {
