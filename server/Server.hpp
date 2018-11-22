@@ -27,6 +27,7 @@ class Server
 
 public:
 	Server();
+	~Server();
 	void listen(int port, Func f);
 	void get(std::string url, RequestCallback callback);
 	void post(std::string url, RequestCallback callback);

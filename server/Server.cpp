@@ -12,6 +12,11 @@ Server::Server()
 		throw "sock create error";  
 	setZero();
 }
+Server::~Server()
+{
+	closesocket(sock);
+	WSACleanup();
+}
 void Server::listen(int port, Func f = NULL)
 {
 	sockAddr.sin_family = AF_INET;

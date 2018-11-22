@@ -6,19 +6,25 @@
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body> 
-            
-        
-		<h1 id="msg">Main page</h1>
-		<form id="form">
-			<input type='text' name='name'> <br>
-			<input type='text' name='age'> <br>
-			<input id="submitButton" type='button' value='send data'>
-		</form>
-					
-		<input id='button' type='button' value='Press me!'> <br>
-		<input id='postButton' type='button' value='Post'>
+		
 		<img src="deadpool.jpg">
+        
+		<form id="postForm">
+			<input type='text' name='name'> <br>
+			<input type='text' name='job'> <br>
+			<input id="postData" type='button' value='Post data'>
+		</form><br>
 			
+		<form id="getForm">
+			<input type='text' name='index'> <br>
+			<input id='getData' type='button' value='Get data'> <br>
+			<label id="dataLabel">Empty</label>
+		</form><br>
+
+		<form id="getAllForm">
+			<input id='getAllData' type='button' value='Get all data'> <br>
+			<label id="allDataLabel">Empty</label><br>
+		</form>
 
 
         <script type="text/javascript" src="script.js"></script>

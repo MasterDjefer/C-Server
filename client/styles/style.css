@@ -2,3 +2,8 @@ body
 {
     background-color: aqua
 }
+
+#allDataLabel 
+{
+    white-space: pre-wrap;
+}

@@ -1,11 +1,34 @@
 #include <fstream>
+#include <vector>
+#include <algorithm>
 #include "Server.hpp"
 #include "VEngine.hpp"
+
+class Person
+{
+	std::string mName;
+	std::string mJob;
+public:
+	Person()
+	{		
+	}
+	Person(const std::string& name, const std::string& job) : mName(name), mJob(job)
+	{
+	}
+	std::string info() const
+	{
+		return mName + " - " + mJob;
+	}
+};
+
 
 int main() 
 {	
 	Server server;
 
+	std::vector<Person> persons;
+
+	//pages
 	VEngine htmlEngine("../client/views", VEngine::EngineType::html);
 	server.get("/", [&htmlEngine](Request req, Response res)
 	{
@@ -25,8 +48,7 @@ int main()
 	});	
 
 
-
-	
+	//images
 	VEngine jpgEngine("../client/images", VEngine::EngineType::jpg);
 	server.get("/deadpool.jpg", [&jpgEngine](Request req, Response res)
 	{		
@@ -40,20 +62,43 @@ int main()
 
 
 
-
-	server.get("/test/:variable", [](Request req, Response res)
+	//data requests
+	server.post("/postData", [&persons](Request req, Response res)
 	{
-		res.send(req.params("variable") + " is shit", Response::ResponseType::html);
+		persons.push_back(Person(req.body("name"), req.body("job")));
+		res.send(req.body("name") + " - " + req.body("job"), Response::ResponseType::html);		
+	});
+	server.get("/getData/:index", [&persons](Request req, Response res)//problem here(request 10times!)
+	{
+		// std::cout << req.params("index") << std::endl;
+		int index = std::stoi(req.params("index"));
+		if (index > 0 && index <= persons.size())
+			res.send(persons.at(index - 1).info(), Response::ResponseType::html);
+		else
+			res.send("Invalid index", Response::ResponseType::html);
 	});	
-	server.get("/:name/:age", [](Request req, Response res)
+	server.get("/getAllData", [&persons](Request req, Response res)
 	{
-		res.send(req.params("name") + " is " + req.params("age"), Response::ResponseType::html);
+		std::string allData = "";
+		std::for_each(persons.begin(), persons.end(), [&allData](const Person& person)
+		{
+			allData += person.info() + "\n";
+		});
+		res.send(allData, Response::ResponseType::html);
 	});
 
-	server.post("/me", [](Request req, Response res)
+	
+	server.get("/ss", [&persons](Request req, Response res)//problem here(request 10times!)
 	{
-		res.send(req.body("name") + " is " + req.body("age"), Response::ResponseType::html);		
-	});
+			res.send("hi", Response::ResponseType::html);
+	});	
+
+
+
+
+
+
+
 
 	int port = 12345;
 	server.listen(port, [port]()

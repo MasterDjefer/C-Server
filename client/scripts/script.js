@@ -1,41 +1,60 @@
-var request = new XMLHttpRequest();
-request.onreadystatechange = function()
+var requestPostData = new XMLHttpRequest();
+requestPostData.onreadystatechange = function()
 {
-    if (request.readyState == XMLHttpRequest.DONE)
+    if (requestPostData.readyState == XMLHttpRequest.DONE)
     {
-        document.getElementById("msg").innerHTML = request.responseText;
+        console.log("Posted: " + requestPostData.responseText);
     }
 }
-document.getElementById("submitButton").onclick = function()
+document.getElementById("postData").onclick = function()
 {
-    request.open("GET", "/?name=" + document.getElementById("form")[0].value + "&age=" + document.getElementById("form")[1].value, true);   
-    request.send();
+    if (document.getElementById("postForm")[0].value.trim() == "" || document.getElementById("postForm")[1].value.trim() == "")
+    {
+        alert("Fill all fields!");
+        return;
+    }
+
+    requestPostData.open("POST", "/postData", true);
+    let obj = document.getElementById("postForm")[0].name + "=" + document.getElementById("postForm")[0].value + "&" + 
+              document.getElementById("postForm")[1].name + "=" + document.getElementById("postForm")[1].value;
+
+    requestPostData.send(obj);
 };
 
-var postRequest = new XMLHttpRequest();
-postRequest.onreadystatechange = function()
+var requestGetData = new XMLHttpRequest();
+requestGetData.onreadystatechange = function()
 {
-    if (postRequest.readyState == XMLHttpRequest.DONE)
+    if (requestGetData.readyState == XMLHttpRequest.DONE)
     {
-        // document.getElementById("msg").innerHTML = postRequest.responseText;
-        console.log(postRequest.responseText);
+        if (requestGetData.responseText == "Invalid index")
+            alert("Input correct index!");
+        else
+            document.getElementById("dataLabel").innerHTML =  requestGetData.responseText;
     }
 }
-document.getElementById("postButton").onclick = function()
+document.getElementById("getData").onclick = function()
 {
-    postRequest.open("POST", "/me", true);
-    var obj = "name=pasha&age=16";
-    postRequest.send(obj);
+    if (!Number(document.getElementById("getForm")[0].value))
+    {
+        alert("Input correct index!");
+        return;
+    }
+
+    requestGetData.open("GET", "/getData?" + document.getElementById("getForm")[0].name + "=" + document.getElementById("getForm")[0].value, true);
+    requestGetData.send();
 };
 
-
-
-
-
-
-
-document.getElementById("button").addEventListener("click", function()
+var requestAllGetData = new XMLHttpRequest();
+requestAllGetData.onreadystatechange = function()
 {
-    document.getElementById("form")[0].value = "rock";
-    document.getElementById("form")[1].value = "roll";
-});
+    if (requestAllGetData.readyState == XMLHttpRequest.DONE)
+    {
+        document.getElementById("allDataLabel").innerHTML =  requestAllGetData.responseText;
+        console.log(requestAllGetData.responseText);
+    }
+}
+document.getElementById("getAllData").onclick = function()
+{
+    requestAllGetData.open("GET", "/getAllData", true);
+    requestAllGetData.send();
+};
